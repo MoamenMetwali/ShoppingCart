@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ShoppingCart.Data;
+using Store.Data;
 
-namespace ShoppingCart
+namespace Store
 {
     public class Startup
     {
@@ -26,8 +26,16 @@ namespace ShoppingCart
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(options => 
-            options.UseSqlServer(
-                Configuration.GetConnectionString("MainConnection")));
+                                                options.UseSqlServer(
+                                                                     Configuration.GetConnectionString("MainConnection")
+                                                                     ));
+            services.AddHttpContextAccessor();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
             services.AddControllersWithViews();
         }
 
@@ -50,6 +58,8 @@ namespace ShoppingCart
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
